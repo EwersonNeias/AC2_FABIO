@@ -1,0 +1,18 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+public class HUDController : MonoBehaviour
+{
+    public Text scoreText;
+    public Text lifeText;
+
+    public void UpdateScore(int score)
+    {
+        scoreText.text = "Score: " + score;
+    }
+
+    public void UpdateLife(int lives)
+    {
+        lifeText.text = "Lives: " + lives;
+    }
+}
