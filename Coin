@@ -1,0 +1,23 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Coin : MonoBehaviour
+{
+    public GameObject particleEffect; 
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+           
+            GameManager.Instance.SetScore(1);
+
+            
+            Instantiate(particleEffect, transform.position, Quaternion.identity);
+
+            
+            Destroy(gameObject);
+        }
+    }
+}
