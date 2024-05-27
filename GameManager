@@ -1,0 +1,87 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class GameManager : MonoBehaviour
+{
+    public int score = 0;
+    public int lives = 5;
+    public static GameManager Instance;
+
+    private HUDController hudController;
+    private Player player;
+
+    void Start()
+    {
+        hudController = FindObjectOfType<HUDController>();
+        player = FindObjectOfType<Player>();
+        RefreshScreen();
+    }
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // N�o destr�i o GameManager ao carregar uma nova cena
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void SetScore(int value)
+    {
+        score += value;
+        Debug.Log("Score updated: " + score);
+        RefreshScreen();
+    }
+
+    public void LoseLife(int value)
+    {
+        lives -= value;
+        if (lives <= 0)
+        {
+            lives = 0;
+            PlayerDied();
+        }
+        else
+        {
+            RefreshScreen();
+        }
+        Debug.Log("Lives updated: " + lives);
+    }
+
+    public void AddLife(int value)
+    {
+        lives += value;
+        Debug.Log("Lives updated: " + lives);
+        RefreshScreen();
+    }
+
+    public void LoadScene(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
+
+    public void RefreshScreen()
+    {
+        if (hudController == null)
+        {
+            hudController = FindObjectOfType<HUDController>();
+        }
+        hudController.UpdateScore(score);
+        hudController.UpdateLife(lives);
+    }
+
+    private void PlayerDied()
+    {
+        Debug.Log("Player died");
+        if (player == null)
+        {
+            player = FindObjectOfType<Player>();
+        }
+        player.DieAndRespawn();
+    }
+    
+}
