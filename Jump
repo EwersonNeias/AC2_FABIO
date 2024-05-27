@@ -1,0 +1,77 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Jump : MonoBehaviour
+{
+    bool isGrounded = false;
+    bool isJumping = false;
+    Rigidbody2D rb;
+
+    public Transform feetPos;
+    public float checkRadius = 0.47f;
+    public LayerMask whatIsGround;
+    public float jumpVelocity = 30;
+    Animator animator;
+
+    [Space(10)]
+    [Header("Sensível ao botão")]
+    public float fallMultiplier = 2.89f;
+    public float lowJumpMultiplier = 3;
+    public float gravity = 0;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+    }
+
+    void Update()
+    {
+        isGrounded = Physics2D.OverlapCircle(feetPos.position, checkRadius, whatIsGround);
+
+        if (isGrounded && rb.velocity.y <= 0)
+        {
+            isJumping = false;
+            animator.SetBool("isJump", false);
+            animator.SetBool("isFall", false);
+        }
+
+        if ((Input.GetKeyDown(KeyCode.Space) || Input.GetButtonDown("Jump")) && isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpVelocity);
+            isJumping = true;
+            animator.SetBool("isJump", true);
+            animator.SetBool("isFall", false);
+        }
+
+        if (!isGrounded && rb.velocity.y < 0)
+        {
+            animator.SetBool("isJump", false);
+            animator.SetBool("isFall", true);
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (rb.velocity.y < 0)
+        {
+            rb.velocity += Vector2.up * (-fallMultiplier * Time.fixedDeltaTime);
+        }
+        else if (rb.velocity.y > 0 && !Input.GetButton("Jump"))
+        {
+            rb.velocity += Vector2.up * (-lowJumpMultiplier * Time.fixedDeltaTime);
+        }
+
+        if (!isGrounded)
+        {
+            rb.velocity += Vector2.up * (gravity * Time.fixedDeltaTime);
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = isGrounded ? Color.red : Color.green;
+        Gizmos.DrawWireSphere(feetPos.position, checkRadius);
+    }
+}
