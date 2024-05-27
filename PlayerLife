@@ -1,0 +1,76 @@
+using System.Collections;
+using UnityEngine;
+
+public class PlayerLifeController : MonoBehaviour
+{
+    public GameObject deathParticleEffect;  
+    public Transform respawnPoint;  
+
+    private Rigidbody2D rb;
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
+    public Color damageColor = Color.red;
+    public float damageFlashDuration = 0.1f;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    public void TakeDamage(int damage)
+    {
+        GameManager.Instance.LoseLife(damage);
+        if (GameManager.Instance.lives <= 0)
+        {
+            DieAndRespawn();
+        }
+        else
+        {
+            StartCoroutine(DamageFlash());
+        }
+    }
+
+    public void DieAndRespawn()
+    {
+        
+        Instantiate(deathParticleEffect, transform.position, Quaternion.identity);
+
+        
+        gameObject.SetActive(false);
+
+       
+        StartCoroutine(Respawn());
+    }
+
+    private IEnumerator Respawn()
+    {
+        yield return new WaitForSeconds(1);
+
+       
+        transform.position = respawnPoint.position;
+
+      
+        gameObject.SetActive(true);
+
+      
+        GameManager.Instance.RefreshScreen();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Enemy"))
+        {
+            TakeDamage(1);
+        }
+    }
+
+    private IEnumerator DamageFlash()
+    {
+        Color originalColor = spriteRenderer.color;
+        spriteRenderer.color = damageColor;
+        yield return new WaitForSeconds(damageFlashDuration);
+        spriteRenderer.color = originalColor;
+    }
+}
